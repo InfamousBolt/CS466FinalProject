@@ -48,7 +48,6 @@ class NeedlemanWunsch:
         """
         matrix = self._initialize_matrix(seq1, seq2)#scoring matrix
         rows, cols = len(seq1) + 1, len(seq2) + 1
-        
         for i in range(1, rows):
             for j in range(1, cols):
                 match_score = self._score(seq1[i-1], seq2[j-1])
@@ -61,7 +60,7 @@ class NeedlemanWunsch:
         #traceback the table
         aligned1, aligned2 = [], []
         i, j = rows-1, cols-1
-        traceback_path = [(i, j)]
+        traceback_path = [(i, j)]#storing the traceback path for arrows in visualization
         
         while i > 0 or j > 0:
             if i > 0 and j > 0:
@@ -95,6 +94,7 @@ class NeedlemanWunsch:
                 j -= 1
             
             traceback_path.append((i, j))
+
         #reversing for traceback
         aligned1 = ''.join(reversed(aligned1))
         aligned2 = ''.join(reversed(aligned2))
@@ -102,7 +102,8 @@ class NeedlemanWunsch:
         return aligned1, aligned2, matrix[-1, -1], traceback_path
 
     def visualize_alignment(self, seq1, seq2):
-        """Visualize the alignment matrix using seaborn heatmap."""
+        """Visualize the alignment matrix using seaborn heatmap with traceback arrows."""
+        _, _, _, traceback_path = self.align(seq1, seq2)
         matrix = self._initialize_matrix(seq1, seq2)
         rows, cols = len(seq1) + 1, len(seq2) + 1
         
@@ -114,16 +115,32 @@ class NeedlemanWunsch:
                     matrix[i-1, j] + self.gap_penalty,
                     matrix[i, j-1] + self.gap_penalty
                 )
-
         plt.figure(figsize=(10, 8))
-        sns.heatmap(matrix, annot=True, fmt='.1f', cmap='coolwarm')
-        plt.title('Alignment Matrix Visualization')
+        ax = sns.heatmap(matrix, annot=True, fmt='.1f', cmap='coolwarm')
+
+        #added traceback arrows
+        for idx in range(len(traceback_path)-1):
+            current = traceback_path[idx]
+            next_pos = traceback_path[idx+1]
+            #arrow coordinates
+            y_start = current[0]
+            x_start = current[1]
+            y_end = next_pos[0]
+            x_end = next_pos[1]
+            
+            ax.arrow(x_start + 0.5, y_start + 0.5,
+                    x_end - x_start, y_end - y_start,#direction?
+                    color='black', head_width=0.1, head_length=0.1,
+                    length_includes_head=True, zorder=2)
+
+        plt.title('Alignment Matrix Visualization with Traceback')
         plt.xlabel('Sequence 2')
         plt.ylabel('Sequence 1')
         plt.show()
 
 def test_alignment():
     #testing simple seq
+    #Kashob would do from BaliBase and Feng would test
     aligner = NeedlemanWunsch(
         match_score=1,
         mismatch_score=-1,
@@ -133,7 +150,7 @@ def test_alignment():
     seq1 = "GCATGCU"
     seq2 = "GATTACA"
 
-    aligned1, aligned2, score = aligner.align(seq1, seq2)
+    aligned1, aligned2, score, _ = aligner.align(seq1, seq2)
 
     print("Sequence 1:", seq1)
     print("Sequence 2:", seq2)
