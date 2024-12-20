@@ -2,7 +2,7 @@ from operator import itemgetter
 
 class NeedlemanWunschAffineGap:
 
-  def __init__():
+  def __init__(self):
     self.UP = (-1,0)
     self.LEFT = (0, -1)
     self.TOPLEFT = (-1, -1)
@@ -12,7 +12,7 @@ class NeedlemanWunschAffineGap:
     self.LG_TAG = "LG"
     self.UG_TAG = "UG"
 
-  def traceback_global(v, w, pointers):
+  def traceback_global(self, v, w, pointers):
       i,j = len(v), len(w)
       curr_tracker = self.D_TAG
       new_v = []
@@ -41,7 +41,7 @@ class NeedlemanWunschAffineGap:
   
   #phi is the gap start penalty
   #sigma is the gap continuation penalty
-  def global_align(v, w, delta, phi, sigma):
+  def global_align(self, v, w, delta, phi, sigma):
       """
       Returns the score of the maximum scoring alignment of the strings v and w, as well as the actual alignment as
       computed by traceback_global.
@@ -120,5 +120,5 @@ class NeedlemanWunschAffineGap:
           pointers[self.D_TAG][i][j], D[i][j] = get_max_step(pointer_list[self.D_TAG], scores)
       score = D[-1][-1]
   
-      alignment = traceback_global(v,w, pointers)
+      alignment = self.traceback_global(v,w, pointers)
       return score, alignment
